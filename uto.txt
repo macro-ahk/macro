@@ -1,0 +1,1668 @@
+; dont steal i will dmca
+; watermark 1
+#Requires AutoHotkey v1.1+
+#SingleInstance Force
+#NoEnv
+setkeydelay, -1
+setmousedelay, -1
+setbatchlines, -1
+SetTitleMatchMode 2
+CoordMode, Tooltip, Relative
+CoordMode, Pixel, Relative
+CoordMode, Mouse, Relative
+msgbox, If you are confused by some of the settings, just ignore them! The only settings you are required to change are the ones under the "Options" Group Box and the "Shaking" Tab!
+ManualFile := A_ScriptDir "\ManualSetupInfo.ini"
+ConfigFile := A_ScriptDir "\Xan3Configurations"
+UserSettingsFile := ConfigFile "\Xan3UserSettings.ini"
+
+if (Round((A_ScreenWidth / A_ScreenHeight), 2) != 1.78) {
+    ErrorType := "devices with screen resolutions that aren't 16:9"
+}
+else if (A_ScreenDPI != 96) {
+    ErrorType := "a DPI Scaling greater than 100%"
+}
+AspectMessage=
+(
+This macro will not work with %ErrorType%.
+Would you like to undergo a manual setup process?
+
+If you have the correct resolution or resolution scaling and still get this message, please DM @lunarosity or join discord.gg/mangos.
+)
+
+if (ErrorType) {
+    Msgbox, 4, Xan V3, %AspectMessage%
+    ifmsgbox, Yes
+        goto ManualSetup
+    else
+        ExitApp
+}
+
+if !FileExist(ConfigFile) {
+    FileCreateDir, %ConfigFile%
+}
+
+CreditsTab=
+(
+Primarily developed by Hu6 and Lunarosity
+Original macro by AsphaltCake | Fisch V11
+Macro functionality changes by Lunarosity
+GUI by Ares and Lunarosity | GUI layout inspired by 0x3b5
+Further minigame improvements by Hu6
+Config by Hu6 and partly inspired by Texture
+Shoutout NotWizzy     Thanks to MrPenguin and SkateF for webhook stuff
+)
+
+SorryTab=
+(
+Hey! I just want to say so sorry for how terrible the release of Xan v3 was
+Me and the Xan Dev Team have worked has hard as we can to fix them!
+As a sorry gift all prices on patreon have been lowered! 
+Also be on the lookout for Fisch Macro V13!
+- Hu6
+)
+
+
+Start:
+; AUTO SUB TO MY KING YATO ------------------
+
+; dont delete this u twat white role, just sub once
+
+If FileExist("AutoSub.ini"){
+    Goto, AutoSubComplete
+}
+else {
+MsgBox, 1, First Time Setup, No configuration has been found`n`nOK = agree to auto subscribe`nCancel = exit
+ifMsgBox Cancel
+exitapp
+run https://www.youtube.com/@yatofisch/community/?sub_confirmation=1
+sleep 3000
+WinGetActiveStats, Title, WindowWidth, WindowHeight, WindowLeft, WindowTop
+SubscribeX := WindowLeft+(WindowWidth/2)
+SubscribeY := WindowTop+(WindowHeight/2)
+click, %SubscribeX%, %SubscribeY%
+send {tab}
+sleep 100
+send {tab}
+sleep 300
+send {enter}
+sleep 500
+send {enter}
+IniWrite, auto-sub, AutoSub.ini, AutoSub, Auto-Sub
+GoSub, AutoSubComplete
+return
+}
+;   GUI CREATION ------------------------------------------------------------------------------------------;
+AutoSubComplete:
+Gui,+AlwaysOnTop
+Gui, Font, cWhite s10 q5, Segoe UI
+Gui +hWndHMain
+Gui, Color, 252525
+HWnd := WinExist()
+
+Gui, Add, Edit, % " x" 0 " y" 235 - 2 " w" 500 " h" 2
+Gui, Add, Edit, % " x" 0 " y" 1 " w" 2 " h" 235 - 2
+Gui, Add, Edit, % " x" 500 - 2 " y" 1 " w" 2 " h" 235 - 2
+
+Gui, Add, Tab, x10 y10 w480 h30 vMainTab gMainTabHandler, Main|Minigame|Shaking|Miscellaneous|Credits|Sorry!
+Gui, Add, Tab, x10 y55 w200 h120 vGeneralTab, General|Tolerances
+Gui, Add, Tab, x10 y70 w146 h121 vStabilityTab, Stable|Unstable
+
+Gui, Tab, General, 2
+Gui, Add, Text, x20 y85, Hold Cast Duration:
+Gui, Add, Text, x20 y105, Bobber Wait Delay:
+Gui, Add, Text, x20 y125, Restart Delay:
+Gui, Add, Text, x20 y146, Navigation Key:
+Gui, Add, Edit, x160 y85 w40 h20 vHoldRodDurationVal cBlack, 600
+Gui, Add, Edit, x160 y105 w40 h20 vWaitForBobberVal cBlack, 1000
+Gui, Add, Edit, x160 y125 w40 h20 vRestartDelayVal cBlack, 1500
+Gui, Add, Edit, x160 y145 w15 vNavigationKey cBlack, \
+
+Gui, Tab, Tolerances, 2
+Gui, Add, Text, x20 y85, Fish Bar:
+Gui, Add, Text, x20 y105, Bar Size Calculation:
+Gui, Add, Text, x20 y125, Click Shake Colour:
+Gui, Add, Text, x20 y145, Arrow Colour:
+Gui, Add, Edit, x160 y85 w20 h20 vFishBarTolerance cBlack, 8
+Gui, Add, Edit, x160 y105 w20 h20 vBarSizeTolerance cBlack, 7
+Gui, Add, Edit, x160 y125 w20 h20 vClickShakeTolerance cBlack, 1
+Gui, Add, Edit, x160 y145 w20 h20 vArrowTolerance cBlack, 7
+
+Gui, Tab, Main, 1
+
+Gui, Add, GroupBox, x220 y50 w270 h145, Options
+Gui, Add, CheckBox, x230 y70 vAutoCamera gAutoBlurHandler, Camera Mode
+Gui, Add, CheckBox, x230 y90 vAutoBlur, Blur Camera
+Gui, Add, CheckBox, x230 y110 vAutoLookDown, Look Down Camera 
+Gui, Add, CheckBox, x230 y130 vZoomCamera, Zoom In Camera
+Gui, Add, CheckBox, x230 y150 vAutoGraphics, Lower Graphics
+Gui, Add, Checkbox, x230 y170 vSeraphicRod, Seraphic Rod
+
+Gui, Add, Text, x375 y70, Delay:
+Gui, Add, Text, x375 y90, Delay:
+Gui, Add, Text, x375 y110, Delay:
+Gui, Add, Text, x375 y130, Delay:
+Gui, Add, Text, x375 y150, Delay:
+Gui, Add, Edit, x420 y70 w20 h20 vAutoCameraDelay cBlack, 10
+Gui, Add, Edit, x420 y90 w20 h20 vAutoBlurDelay cBlack, 10
+Gui, Add, Edit, x420 y110 w20 h20 vAutoLookDownDelay cBlack, 30
+Gui, Add, Edit, x420 y130 w20 h20 vZoomCameraDelay cBlack, 25
+Gui, Add, Edit, x420 y150 w20 h20 vAutoGraphicsDelay cBlack, 10
+
+Gui, Tab, Minigame, 1
+
+Gui, Add, GroupBox, x165 y64 w325 h127, General
+
+Gui, Add, Text, x175 y84, Stabilizer Loop:
+Gui, Add, Text, x175 y104, SideBar Ratio:
+Gui, Add, Edit, x275 y84 w30 h20 vStabilizerLoopValue cBlack, 14
+Gui, Add, Edit, x275 y104 w30 h20 vSidebarRatioValue cBlack, 0.8
+
+Gui, Add, GroupBox, x165 y125 w150 h66, Ankle break
+
+Gui, Add, Text, x175 y143, Right Multiplier:
+Gui, Add, Text, x175 y164, Left Multiplier:
+Gui, Add, Edit, x275 y143 w30 h20 vAnkleRightMultiplier cBlack, 0.5
+Gui, Add, Edit, x275 y164 w30 h20 vAnkleLeftMultiplier cBlack, 0.3
+
+Gui, Add, Text, x310 y84, Bar Calculation Failsafe:
+Gui, Add, Text, x310 y104, Bar Size (0 = Auto):
+Gui, Add, Edit, x450 y84 w30 h20 vBarCalculationFailsafe cBlack, 10
+Gui, Add, Edit, x450 y104 w30 h20 vManualBarSizeValue cBlack, 0
+
+Gui, Add, Text, x320 y140, Look at all this empty space`nMust be lonely :(
+
+Gui, Tab, Stable, 3
+Gui, Add, Text, x20 y101, Right Multiplier:
+Gui, Add, Text, x20 y122, Left Multiplier:
+Gui, Add, Text, x20 y143, Right Division:
+Gui, Add, Text, x20 y164, Left Division:
+Gui, Add, Edit, x120 y101 w30 h20 vStableRightMultiplier cBlack, 2.0
+Gui, Add, Edit, x120 y122 w30 h20 vStableLeftMultiplier cBlack, 1.93
+Gui, Add, Edit, x120 y143 w30 h20 vStableRightDivision cBlack, 1.66
+Gui, Add, Edit, x120 y164 w30 h20 vStableLeftDivision cBlack, 1
+
+Gui, Tab, Unstable, 3
+Gui, Add, Text, x20 y101, Right Multiplier:
+Gui, Add, Text, x20 y122, Left Multiplier:
+Gui, Add, Text, x20 y143, Right Division:
+Gui, Add, Text, x20 y164, Left Division:
+Gui, Add, Edit, x120 y101 w30 h20 vUnstableRightMultiplier cBlack, 2.4
+Gui, Add, Edit, x120 y122 w30 h20 vUnstableLeftMultiplier cBlack, 2.25
+Gui, Add, Edit, x120 y143 w30 h20 vUnstableRightDivision cBlack, 1.1
+Gui, Add, Edit, x120 y164 w30 h20 vUnstableLeftDivision cBlack, 1
+
+Gui, Tab, Shaking, 1
+
+Gui, Add, GroupBox, x10 y41 w480 h150, General
+Gui, Add, CheckBox, x20 y80 vAutoShakeEnabled, AutoShake
+Gui, Add, DropDownList, x20 y107 w115 vAutoShake gUIShakeHandler, Click|Navigation
+
+Gui, Add, Text, x20 y170, Like bruh 4 settings
+Gui, Add, Text, x350 y100, Theres literally`nnothing more`nto add
+
+Gui, Add, GroupBox, x175 y80 w150 h111 vClickShakeGUI1, Click
+Gui, Add, Text, x185 y100 vClickShakeGUI2, Failsafe:
+Gui, Add, Edit, x295 y100 w20 h20 vClickShakeGUI3 cBlack,
+Gui, Add, Text, x185 y122 vClickShakeGUI4, Second click delay:
+Gui, Add, Edit, x300 y122 w15 h20 vClickShakeGUI5 cBlack,
+
+Gui, Add, GroupBox, x175 y80 w150 h111 vNavigationShakeGUI1, Navigation
+Gui, Add, Text, x185 y100 vNavigationShakeGUI2, Failsafe:
+Gui, Add, Edit, x295 y100 w20 h20 vNavigationShakeGUI3 cBlack,
+Gui, Add, Text, x185 y122 vNavigationShakeGUI4, Spam delay:
+Gui, Add, Edit, x300 y122 w15 h20 vNavigationShakeGUI5 cBlack,
+
+Gui, Tab, Miscellaneous
+Gui, Add, GroupBox, x10 y40 w480 h155, Webhook Settings
+Gui, Add, Text, x20 y60, Webhook link:
+Gui, Add, Edit, x120 y60 w100 h20 vWebhookLinkInput cBlack,
+Gui, Add, Button, x230 y59 w95 h23 gTestWebhook, Test Webhook
+Gui Add, Text, x20 y80 h35, More webhook settings are actually coming don't worry :3 -Lunar
+
+Gui, Add, Text, x20 y105, Hi chat. I have delayed the autosell feature for the Atlas release.`nSorry for any potential inconvenience lol.`nIn exchange here's early access to a feature from Atlas!!
+Gui, Add, Button, gServerHop x20 h25 y162, Serverhop
+Gui, Add, Text, x100 y165, (Designed for Aurora hunting | Shouldn't but may break lol)
+
+Gui, Tab, Credits
+Gui, Add, GroupBox, x10 y45 w460 h151, Credits
+Gui, Add, Text, x20 y65, % CreditsTab
+
+Gui, Tab, Sorry
+Gui, Add, GroupBox, x10 y45 w460 h151, Sorry!
+Gui, Add, Text, x20 y65, % SorryTab
+
+Gui, Tab
+Gui, Add, Button, gSaveSettings x10 h25 y200, Save to file
+Gui, Add, Button, gLoadMacro x350 h25 y200, Launch macro
+
+Gui, Add, DropDownList, x110 y200 w110 vConfigList, Default|| 
+Gui, Add, Button, gLoadSettings x220 h25 y200, Load config
+
+Loop, Files, %ConfigFile%\*.ini
+{
+    CleanName := StrReplace(A_LoopFileName, ".ini")
+    GuiControl,, ConfigList, %CleanName%
+}
+
+Gui, Add, Link,x450 h25 y203, <a href="https://discord.gg/ezWfR4AH5B">Discord</a>
+Gui, Show, w500 h235, Xan V3  
+
+GuiControl, Disable, AutoBlur
+GuiControl, Disable, AutoBlurDelay
+
+GuiControl Hide, StabilityTab
+Loop, 5 {
+    GuiControl, Hide, % "ClickShakeGUI" A_Index
+    GuiControl, Hide, % "NavigationShakeGUI" A_Index
+}
+;EnableBlur(hMain)
+return
+
+MainTabHandler:
+GuiControlGet MainTab
+GuiControl % (MainTab = "Minigame") ? "Show" : "Hide", StabilityTab
+GuiControl % (MainTab = "Main") ? "Show" : "Hide", GeneralTab
+GuiControl MoveDraw, MainTab
+return
+
+UIShakeHandler:
+GuiControlGet, AutoShake
+Loop, 5 {
+    GuiControl, Show, % AutoShake "ShakeGUI" A_Index
+    GuiControl, Hide, % (AutoShake = "Click" ? "Navigation" : "Click") "ShakeGUI" A_Index
+}
+return
+
+AutoBlurHandler:
+GuiControlGet AutoCamera
+if AutoCamera {
+    GuiControl, Enable, AutoBlur
+    GuiControl, Enable, AutoBlurDelay 
+}
+else {
+    GuiControl,, AutoBlur, 0
+    GuiControl, Disable, AutoBlur
+    GuiControl, Disable, AutoBlurDelay
+}
+return
+
+TestWebhook:
+GuiControlGet WebhookLinkInput
+WebhookURL := WebhookLinkInput
+SendDiscordMessage("caught/lost", "Testing Xan v3 Webhook")
+return
+
+;   SETTINGS ----------------------------------------------------------------------------------------------;
+
+SaveSettings:
+Gui, Submit, NoHide
+
+GuiControlGet ConfigList
+WriteToFile := (ConfigList = "Default" ? UserSettingsFile : ConfigFile "\" ConfigList ".ini")
+
+IniWrite, %AutoShakeEnabled%, %WriteToFile%, AutoShake, auto-shake-enabled
+IniWrite, %AutoShake%, %WriteToFile%, AutoShake, auto-shake
+IniWrite, %ClickShakeGUI3%, %WriteToFile%, AutoShake, shake-failsafe
+IniWrite, %ClickShakeGUI5%, %WriteToFile%, AutoShake, shake-second-click
+IniWrite, %NavigationShakeGUI3%, %WriteToFile%, AutoShake, navigation-shake-failsafe
+IniWrite, %NavigationShakeGUI5%, %WriteToFile%, AutoShake, navigation-spam-delay
+
+IniWrite, %NavigationKey%, %WriteToFile%, General, nav-key
+IniWrite, %AutoCamera%, %WriteToFile%, General, auto-enable-camera
+IniWrite, %AutoLookDown%, %WriteToFile%, General, auto-look-down
+IniWrite, %AutoBlur%, %WriteToFile%, General, auto-blur
+IniWrite, %ZoomCamera%, %WriteToFile%, General, auto-zoom-camera
+IniWrite, %AutoGraphics%, %WriteToFile%, General, auto-graphics
+
+IniWrite, %AutoCameraDelay%, %WriteToFile%, General, auto-enable-camera-delay
+IniWrite, %AutoLookDownDelay%, %WriteToFile%, General, auto-look-down-delay
+IniWrite, %AutoBlurDelay%, %WriteToFile%, General, auto-blur-delay
+IniWrite, %ZoomCameraDelay%, %WriteToFile%, General, auto-zoom-camera-delay
+IniWrite, %AutoGraphicsDelay%, %WriteToFile%, General, auto-graphics-delay
+
+IniWrite, %HoldRodDurationVal%, %WriteToFile%, General, hold-rod-duration-val
+IniWrite, %WaitForBobberVal%, %WriteToFile%, General, wait-for-bobber-val
+IniWrite, %RestartDelayVal%, %WriteToFile%, General, restart-delay-val
+
+IniWrite, %StableRightMultiplier%, %WriteToFile%, Minigame, stable-right-multi
+IniWrite, %StableLeftMultiplier%, %WriteToFile%, Minigame, stable-left-multi
+IniWrite, %StableRightDivision%, %WriteToFile%, Minigame, stable-right-div
+IniWrite, %StableLeftDivision%, %WriteToFile%, Minigame, stable-left-div
+
+IniWrite, %UnstableRightMultiplier%, %WriteToFile%, Minigame, unstable-right-multi
+IniWrite, %UnstableLeftMultiplier%, %WriteToFile%, Minigame, unstable-left-multi
+IniWrite, %UnstableRightDivision%, %WriteToFile%, Minigame, unstable-right-div
+IniWrite, %UnstableLeftDivision%, %WriteToFile%, Minigame, unstable-left-div
+
+IniWrite, %AnkleRightMultiplier%, %WriteToFile%, Minigame, ankle-right-multi
+IniWrite, %AnkleLeftMultiplier%, %WriteToFile%, Minigame, ankle-left-multi
+
+IniWrite, %StabilizerLoopValue%, %WriteToFile%, Minigame, stabilizer-loop-value
+IniWrite, %SidebarRatioValue%, %WriteToFile%, Minigame, sidebar-ratio-value
+
+IniWrite, %ManualBarSizeValue%, %WriteToFile%, Minigame, manual-bar-size-value
+
+IniWrite, %FishBarTolerance%, %WriteToFile%, Tolerances, fish-bar-tolerance
+IniWrite, %BarCalculationFailsafe%, %WriteToFile%, Tolerances, bar-calculation-failsafe
+IniWrite, %BarSizeTolerance%, %WriteToFile%, Tolerances, bar-size-tolerance
+IniWrite, %ClickShakeTolerance%, %WriteToFile%, Tolerances, click-shake-tolerance
+IniWrite, %ArrowTolerance%, %WriteToFile%, Tolerances, arrow-tolerance
+
+IniWrite, %WebhookLinkInput%, %WriteToFile%, Webhook, webhook-link
+IniWrite, %SeraphicRod%, %WriteToFile%, Minigame, seraphic-rod
+IniWrite, autosub, %WriteToFile%, AutoSub, auto-sub, 1
+; Write Separator ============================================================================;
+	sleep 200
+; Read Separator ============================================================================;
+
+ReadSettingsFromFile(WriteToFile)
+	
+MsgBox, 64, Xan V3, Saved settings to the .ini file.
+return
+
+LoadSettings:
+GuiControlGet ConfigList
+ReadSettingsFromFile((ConfigList = "Default" ? UserSettingsFile : ConfigFile "\" ConfigList ".ini"))
+
+GuiControl,, AutoShakeEnabled, %iniAutoShakeEnabled%
+GuiControl, Choose, AutoShake, %iniAutoShake%
+GuiControl,, NavigationKey, %iniNavigationKey%
+GuiControl,, AutoCamera, %iniAutoCamera%
+GuiControl,, AutoLookDown, %iniAutoLookDown%
+GuiControl,, AutoBlur, %iniAutoBlur%
+GuiControl,, ZoomCamera, %iniZoomCamera%
+GuiControl,, AutoGraphics, %iniAutoGraphics%
+GuiControl,, AutoCameraDelay, %iniAutoCameraDelay%
+GuiControl,, AutoLookDownDelay, %iniAutoLookDownDelay%
+GuiControl,, AutoBlurDelay, %iniAutoBlurDelay%
+GuiControl,, ZoomCameraDelay, %iniZoomCameraDelay%
+GuiControl,, AutoGraphicsDelay, %iniAutoGraphicsDelay%
+GuiControl,, HoldRodDurationVal, %iniHoldRodDurationVal%
+GuiControl,, WaitForBobberVal, %iniWaitForBobberVal%
+GuiControl,, RestartDelayVal, %iniRestartDelayVal%
+GuiControl,, StableRightMultiplier, %iniStableRightMultiplier%
+GuiControl,, StableLeftMultiplier, %iniStableLeftMultiplier%
+GuiControl,, StableRightDivision, %iniStableRightDivision%
+GuiControl,, StableLeftDivision, %iniStableLeftDivision%
+GuiControl,, UnstableRightMultiplier, %iniUnstableRightMultiplier%
+GuiControl,, UnstableLeftMultiplier, %iniUnstableLeftMultiplier%
+GuiControl,, UnstableRightDivision, %iniUnstableRightDivision%
+GuiControl,, UnstableLeftDivision, %iniUnstableLeftDivision%
+GuiControl,, AnkleRightMultiplier, %iniAnkleRightMultiplier%
+GuiControl,, AnkleLeftMultiplier, %iniAnkleLeftMultiplier%
+GuiControl,, StabilizerLoopValue, %iniStabilizerLoopValue%
+GuiControl,, SidebarRatioValue, %iniSidebarRatioValue%
+GuiControl,, ManualBarSizeValue, %iniManualBarSizeValue%
+GuiControl,, FishBarTolerance, %iniFishBarTolerance%
+GuiControl,, BarCalculationFailsafe, %iniBarCalculationFailsafe%
+GuiControl,, BarSizeTolerance, %iniBarSizeTolerance%
+GuiControl,, ClickShakeTolerance, %iniClickShakeTolerance%
+GuiControl,, ArrowTolerance, %iniArrowTolerance%
+GuiControl,, WebhookLinkInput, %iniWebhookLinkInput%
+GuiControl,, Seraphic, %iniSeraphicRod%
+GuiControl,, ClickShakeGUI5, %iniClickShakeSecondClick%
+GuiControl,, NavigationShakeGUI5, %iniNavigationSpamDelay%
+
+GuiControlGet, AutoShake
+GuiControl,, % (AutoShake = "Click" ? "ClickShakeGUI" : "NavigationShakeGUI") 3, % (AutoShake = "Click" ? iniClickShakeFailsafe : iniNavigationShakeFailsafe)
+GuiControl,, % (AutoShake = "Click" ? "ClickShakeGUI" : "NavigationShakeGUI") 5, % (AutoShake = "Click" ? iniClickShakeSecondClick : iniNavigationSpamDelay)
+
+Loop, 5 {
+    GuiControl, Show, % AutoShake "ShakeGUI" A_Index
+    GuiControl, Hide, % (AutoShake = "Click" ? "NavigationShakeGUI" : "ClickShakeGUI") A_Index
+}
+return
+
+GuiClose:
+Exitapp
+	
+LoadMacro:
+	Gui, Hide
+	GuiHidden := true
+
+    sleep 1
+    if (iniAutoShakeEnabled > 0) {
+        AutoShake := true
+        ShakeMode := iniAutoShake
+    }
+    else {
+        AutoShake := false
+        ShakeMode := "Disabled"
+    }
+    
+    if (iniZoomCamera > 0) {
+        AutoZoomInCamera := true
+        AutoZoomDelay := iniZoomCameraDelay
+    }
+    else {
+        AutoZoomInCamera := false
+    }
+    
+    if (iniAutoCamera > 0) {
+        AutoEnableCameraMode := true
+        AutoCameraDelay := iniAutoCameraDelay
+    }
+    else {
+        AutoEnableCameraMode := false
+    }
+    
+    if (iniAutoLookDown > 0) {
+        AutoLookDownCamera := true
+        AutoLookDelay := iniAutoLookDownDelay
+    }
+    else {
+        AutoLookDownCamera := false
+    }
+    
+    if (iniAutoBlur > 0) {
+        AutoBlurCamera := true
+        AutoBlurDelay := iniAutoBlurDelay
+    }
+    else {
+        AutoBlurCamera := false
+    }
+    
+    if (iniAutoGraphics > 0) {
+        AutoLowerGraphics := true
+        AutoGraphicsDelay := iniAutoGraphicsDelay
+    }
+    else {
+        AutoLowerGraphics := false
+    }
+    if (iniseraphicrod > 0){
+        Seraphic := True
+    }
+    else {
+        Seraphic := False 
+    }
+    ; -----Settings--------------
+    RestartDelay := iniRestartDelayVal
+    HoldRodCastDuration := iniHoldRodDurationVal
+    WaitForBobberDelay := iniWaitForBobberVal
+    NavigationKey := iniNavigationKey
+    ClickShakeSecondClickTime := iniClickShakeSecondClick
+    FishBarColorTolerance := iniFishBarTolerance
+    ClickShakeFailsafe := iniClickShakeFailsafe
+    ClickShakeColorTolerance := iniClickShakeTolerance
+    NavigationShakeFailsafe := iniNavigationShakeFailsafe
+    NavigationSpamDelay := iniNavigationSpamDelay
+    ManualBarSize := iniManualBarSizeValue
+    BarCalculationFailsafe := iniBarCalculationFailsafe
+    BarSizeCalculationColorTolerance := iniBarSizeTolerance
+    WhiteBarColorTolerance := iniWhiteBarColorTolerance
+    ArrowColorTolerance := iniArrowTolerance
+    StabilizerLoop := iniStabilizerLoopValue
+    SideBarRatio := iniSidebarRatioValue
+    StableRightMultiplier := iniStableRightMultiplier
+    StableRightDivision := iniStableRightDivision
+    StableLeftMultiplier := iniStableLeftMultiplier
+    StableLeftDivision := iniStableLeftDivision
+    UnstableRightMultiplier := iniUnstableRightMultiplier
+    UnstableRightDivision := iniUnstableRightDivision
+    UnstableLeftMultiplier := iniUnstableLeftMultiplier
+    UnstableLeftDivision := iniUnstableLeftDivision
+    RightAnkleBreakMultiplier := iniAnkleRightMultiplier
+    LeftAnkleBreakMultiplier := iniAnkleLeftMultiplier
+    WebhookURL := iniWebhookLinkInput
+
+    if (ShakeMode != "Navigation" and ShakeMode != "Click" and AutoShake == true)
+    {
+        msgbox, ShakeMode must be set to "Click" or "Navigation"!
+        exitapp
+    }
+
+	CheckRobloxScreen() {
+        WinGet, id, List, Roblox
+        Loop, %id%
+        {
+            this_id := id%A_Index%
+            WinGetPos, X, Y, Width, Height, ahk_id %this_id%
+            if (Width > 0 && Height > 0) {
+                WinActivate, ahk_id %this_id%
+                return true
+            }
+        }
+        return false
+    }
+    
+    Loop {
+        if CheckRobloxScreen() {
+            break
+        }
+        msgbox, Roblox is not open! Starting Roblox...
+        RunWait, roblox://placeId=16732694052
+        reload
+    }
+    send {lbutton up}
+    send {rbutton up}
+    send {shift up}
+
+;----------------------------------------------------------------------------------------------------------;
+
+Calculations:
+    WinGetActiveStats, Title, WindowWidth, WindowHeight, WindowLeft, WindowTop
+    CameraCheckLeft := WindowWidth/2.8444
+    CameraCheckRight := WindowWidth/1.5421
+    CameraCheckTop := WindowHeight/1.28
+    CameraCheckBottom := WindowHeight
+
+    if (!FileExist(ManualFile)) {
+        ClickAreaLeft := WindowWidth/4.05020920502
+        ClickAreaRight := WindowWidth/1.29325317301
+        ClickAreaTop := WindowHeight/9.52727272727
+        ClickAreaBottom := WindowHeight/1.28746928747
+
+        MinigameAreaLeft := 0.2981543095 * WindowWidth
+        MinigameAreaRight := 0.7018456905 * WindowWidth
+        MinigameAreaTop := WindowHeight/1.201
+        MinigameAreaBottom := WindowHeight/1.15
+        MinigameAreaTooltipHeight := WindowHeight/1.0626
+
+        ProgressAreaLeft := 0.391298225298586024 * WindowWidth
+        ProgressAreaRight := 0.608701774701413976 * WindowWidth
+        ProgressAreaTop := WindowHeight/1.13
+        ProgressAreaBottom := WindowHeight/1.08
+    }
+    else {
+        IniRead, ClickTypeLeft, %ManualFile%, Click, Left, 0
+        IniRead, ClickTypeTop, %ManualFile%, Click, Top, 0
+        IniRead, ClickTypeRight, %ManualFile%, Click, Right, 0
+        IniRead, ClickTypeBottom, %ManualFile%, Click, Bottom, 0
+        ClickAreaLeft := ClickTypeLeft
+        ClickAreaRight := ClickTypeRight
+        ClickAreaTop := ClickTypeTop
+        ClickAreaBottom := ClickTypeBottom
+
+        IniRead, MinigameTypeLeft, %ManualFile%, Minigame, Left, 0
+        IniRead, MinigameTypeTop, %ManualFile%, Minigame, Top, 0
+        IniRead, MinigameTypeRight, %ManualFile%, Minigame, Right, 0
+        IniRead, MinigameTypeBottom, %ManualFile%, Minigame, Bottom, 0
+        MinigameAreaLeft := MinigameTypeLeft
+        MinigameAreaRight := MinigameTypeRight
+        MinigameAreaTop := MinigameTypeTop
+        MinigameAreaBottom := MinigameTypeBottom
+
+        IniRead, ProgressTypeLeft, %ManualFile%, Progress, Left, 0
+        IniRead, ProgressTypeTop, %ManualFile%, Progress, Top, 0
+        IniRead, ProgressTypeRight, %ManualFile%, Progress, Right, 0
+        IniRead, ProgressTypeBottom, %ManualFile%, Progress, Bottom, 0
+        ProgressAreaLeft := ProgressTypeLeft
+        ProgressAreaRight := ProgressTypeRight
+        ProgressAreaTop := ProgressTypeTop
+        ProgressAreaBottom := ProgressTypeBottom
+    }
+	
+
+
+    ResolutionScaling := WindowWidth / (WindowWidth * 2.37)
+    MidScreenX := A_ScreenWidth/2
+    MidScreenY := A_ScreenHeight/2
+    LookDownX := WindowWidth/2
+    LookDownY := WindowHeight/4
+    runtimeS := -1
+    runtimeM := 0
+    runtimeH := 0
+	TotalCaught := 0
+	TotalLost := 0
+	LastTime := 0
+    TooltipX := (A_ScreenWidth/20)
+    Tooltip1 := (A_ScreenHeight/2)-(20*9)
+    Tooltip2 := (A_ScreenHeight/2)-(20*8)
+    Tooltip3 := (A_ScreenHeight/2)-(20*7)
+    Tooltip4 := (A_ScreenHeight/2)-(20*6)
+    Tooltip5 := (A_ScreenHeight/2)-(20*5)
+    Tooltip6 := (A_ScreenHeight/2)-(20*4)
+    Tooltip7 := (A_ScreenHeight/2)-(20*3)
+    Tooltip8 := (A_ScreenHeight/2)-(20*2)
+    Tooltip9 := (A_ScreenHeight/2)-(20*1)
+    Tooltip10 := (A_ScreenHeight/2)
+    Tooltip11 := (A_ScreenHeight/2)+(20*1)
+    Tooltip12 := (A_ScreenHeight/2)+(20*2)
+    Tooltip13 := (A_ScreenHeight/2)+(20*3)
+    Tooltip14 := (A_ScreenHeight/2)+(20*4)
+    Tooltip15 := (A_ScreenHeight/2)+(20*5)
+    Tooltip16 := (A_ScreenHeight/2)+(20*6)
+    Tooltip17 := (A_ScreenHeight/2)+(20*7)
+    Tooltip18 := (A_ScreenHeight/2)+(20*8)
+    Tooltip19 := (A_ScreenHeight/2)+(20*9)
+    Tooltip20 := (A_ScreenHeight/2)+(20*10)
+    if (AutoLowerGraphics == true) {
+        tooltip, AutoLowerGraphics: true, %TooltipX%, %Tooltip8%, 8
+    }
+    else {
+        tooltip, AutoLowerGraphics: false, %TooltipX%, %Tooltip8%, 8
+    }
+    if (AutoEnableCameraMode == true) {
+        tooltip, AutoEnableCameraMode: true, %TooltipX%, %Tooltip9%, 9
+    }
+    else {
+        tooltip, AutoEnableCameraMode: false, %TooltipX%, %Tooltip9%, 9
+    }
+    if (AutoZoomInCamera == true) {
+        tooltip, AutoZoomInCamera: true, %TooltipX%, %Tooltip10%, 10
+    }
+    else {
+        tooltip, AutoZoomInCamera: false, %TooltipX%, %Tooltip10%, 10
+    }
+    if (AutoLookDownCamera == true) {
+        tooltip, AutoLookDownCamera: true, %TooltipX%, %Tooltip11%, 11
+    }
+    else {
+        tooltip, AutoLookDownCamera: false, %TooltipX%, %Tooltip11%, 11
+    }
+    if (AutoBlurCamera == true) {
+        tooltip, AutoBlurCamera: true, %TooltipX%, %Tooltip12%, 12
+    }
+    else {
+        tooltip, AutoBlurCamera: false, %TooltipX%, %Tooltip12%, 12
+    }
+    tooltip, Press "P" to Start, %TooltipX%, %Tooltip4%, 4
+    tooltip, Press "O" to Reload, %TooltipX%, %Tooltip5%, 5
+    tooltip, Press "M" to Exit, %TooltipX%, %Tooltip6%, 6
+
+    if (NavigationKey != "") {
+        tooltip, Navigation Key: "%NavigationKey%", %TooltipX%, %Tooltip14%, 14
+    }
+    else {
+        msgbox, Please set a Navigation Key for certain settings to work
+        reload
+    }
+    
+    tooltip, Shake Mode: %ShakeMode%, %TooltipX%, %Tooltip16%, 16
+
+;   RUNTIME -----------------------------------------------------------------------------------------------;
+
+runtime:
+    runtimeS++
+    if (runtimeS >= 60)
+    {
+        runtimeS := 0
+        runtimeM++
+    }
+    if (runtimeM >= 60)
+    {
+        runtimeM := 0
+        runtimeH++
+    }
+
+    tooltip, Runtime: %runtimeH%h %runtimeM%m %runtimeS%s, %TooltipX%, %Tooltip2%, 2
+
+    if (WinExist("ahk_exe RobloxPlayerBeta.exe")) {
+        if (!WinActive("ahk_exe RobloxPlayerBeta.exe")) {
+            WinActivate
+        }
+    }
+    else {
+        exitapp
+    }
+return
+
+;   KEYBINDS ----------------------------------------------------------------------------------------------;
+$o::
+if (GuiHidden) { 
+	Reload
+}
+else {
+    If GetKeyState("CapsLock", "T") {
+        send {O}
+    }
+    else {
+        send {o}
+    }
+}
+return
+
+$m::
+if (GuiHidden) {
+	ExitApp
+}
+else {
+    If GetKeyState("CapsLock", "T") {
+        send {M}
+    }
+    else {
+        send {m}
+    }
+}
+return
+
+;   LOGIC -------------------------------------------------------------------------------------------------;
+$p::
+if (GuiHidden) {
+} else {
+	If GetKeyState("CapsLock", "T") {
+        send {P}
+    }
+    else {
+        send {p}
+    }
+	return
+}
+    gosub, Calculations
+    settimer, runtime, 1000
+
+    tooltip, Press "O" to Reload, %TooltipX%, %Tooltip4%, 4
+    tooltip, Press "M" to Exit, %TooltipX%, %Tooltip5%, 5
+    tooltip, , , , 6
+    tooltip, , , , 10
+    tooltip, , , , 11
+    tooltip, , , , 12
+    tooltip, , , , 14
+    tooltip, , , , 16
+    SellTimeHandle := A_Now
+    tooltip, Current Task: AutoLowerGraphics, %TooltipX%, %Tooltip7%, 7
+    tooltip, F10 Count: 0/20, %TooltipX%, %Tooltip9%, 9
+    f10counter := 0
+    if (AutoLowerGraphics == true)
+    {
+        send {shift}
+        tooltip, Action: Press Shift, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoGraphicsDelay%
+        send {shift down}
+        tooltip, Action: Hold Shift, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoGraphicsDelay%
+        loop, 20
+        {
+            f10counter++
+            tooltip, F10 Count: %f10counter%/20, %TooltipX%, %Tooltip9%, 9
+            send {f10}
+            tooltip, Action: Press F10, %TooltipX%, %Tooltip8%, 8
+            sleep %AutoGraphicsDelay%
+        }
+        send {shift up}
+        tooltip, Action: Release Shift, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoGraphicsDelay%
+    }
+    tooltip, Current Task: AutoZoomInCamera, %TooltipX%, %Tooltip7%, 7
+    tooltip, Scroll In: 0/20, %TooltipX%, %Tooltip9%, 9
+    tooltip, Scroll Out: 0/1, %TooltipX%, %Tooltip10%, 10
+    scrollcounter := 0
+    if (AutoZoomInCamera == true)
+    {
+        sleep %AutoZoomDelay%
+        loop, 20
+        {
+            scrollcounter++
+            tooltip, Scroll In: %scrollcounter%/20, %TooltipX%, %Tooltip9%, 9
+            send {wheelup}
+            tooltip, Action: Scroll In, %TooltipX%, %Tooltip8%, 8
+            sleep %AutoZoomDelay%
+        }
+        send {wheeldown}
+        tooltip, Scroll Out: 1/1, %TooltipX%, %Tooltip10%, 10
+        tooltip, Action: Scroll Out, %TooltipX%, %Tooltip8%, 8
+        AutoZoomDelay := AutoZoomDelay*5
+        sleep %AutoZoomDelay%
+    }
+    tooltip, , , , 10
+    tooltip, Current Task: AutoEnableCameraMode, %TooltipX%, %Tooltip7%, 7
+    tooltip, Right Count: 0/10, %TooltipX%, %Tooltip9%, 9
+    rightcounter := 0
+    if (AutoEnableCameraMode == true)
+    {
+        PixelSearch, , , CameraCheckLeft, CameraCheckTop, CameraCheckRight, CameraCheckBottom, 0xFFFFFF, 0, Fast
+        if (ErrorLevel == 0)
+        {
+            sleep %AutoCameraDelay%
+            send {2}
+            tooltip, Action: Press 2, %TooltipX%, %Tooltip8%, 8
+            sleep %AutoCameraDelay%
+            send {1}
+            tooltip, Action: Press 1, %TooltipX%, %Tooltip8%, 8
+            sleep %AutoCameraDelay%
+            send {%NavigationKey%}
+            tooltip, Action: Press %NavigationKey%, %TooltipX%, %Tooltip8%, 8
+            sleep %AutoCameraDelay%
+            loop, 10
+            {
+                rightcounter++
+                tooltip, Right Count: %rightcounter%/10, %TooltipX%, %Tooltip9%, 9
+                send {right}
+                tooltip, Action: Press Right, %TooltipX%, %Tooltip8%, 8
+                sleep %AutoCameraDelay%
+            }
+            send {enter}
+            tooltip, Action: Press Enter, %TooltipX%, %Tooltip8%, 8
+            sleep %AutoCameraDelay%
+        }
+    }
+
+;   MACRO RESTART -----------------------------------------------------------------------------------------;
+
+RestartMacro:
+    tooltip, , , , 9
+
+    tooltip, Current Task: AutoLookDownCamera, %TooltipX%, %Tooltip7%, 7
+    if (AutoLookDownCamera == true) {
+        send {rbutton up}
+        sleep %AutoLookDelay%
+        mousemove, LookDownX, LookDownY
+        tooltip, Action: Position Mouse, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoLookDelay%
+        send {rbutton down}
+        tooltip, Action: Hold Right Click, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoLookDelay%
+        DllCall("mouse_event", "UInt", 0x01, "UInt", 0, "UInt", 10000)
+        tooltip, Action: Move Mouse Down, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoLookDelay%
+        send {rbutton up}
+        tooltip, Action: Release Right Click, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoLookDelay%
+        mousemove, LookDownX, LookDownY
+        tooltip, Action: Position Mouse, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoLookDelay%
+    }
+    tooltip, Current Task: AutoBlurCamera, %TooltipX%, %Tooltip7%, 7
+    if (AutoBlurCamera == true) {
+        sleep %AutoBlurDelay%
+        send {m}
+        tooltip, Action: Press M, %TooltipX%, %Tooltip8%, 8
+        sleep %AutoBlurDelay%
+    }
+    tooltip, Current Task: Casting Rod, %TooltipX%, %Tooltip7%, 7
+    send {lbutton down}
+    sleep %HoldRodCastDuration%
+    tooltip, Action: Casting For %HoldRodCastDuration%ms, %TooltipX%, %Tooltip8%, 8
+    send {lbutton up}
+    tooltip, Action: Waiting For Bobber (%WaitForBobberDelay%ms), %TooltipX%, %Tooltip8%, 8
+    sleep %WaitForBobberDelay%
+
+    if (!AutoShake) {
+        tooltip, Searching for minigame | False, %TooltipX%, %Tooltip7%, 7
+        tooltip, Action: Waiting for minigame to appear, %TooltipX%, %Tooltip8%, 8
+
+        loop {
+            PixelSearch, ProgressAreaX,, ProgressAreaRight, ProgressAreaTop, ProgressAreaLeft, ProgressAreaBottom, 0xFFFFFF, 1, Fast
+            if !ErrorLevel {
+                if (ProgressAreaX < (A_ScreenWidth / 2.133333)) {
+                    
+                    tooltip, Searching for minigame | True, %TooltipX%, %Tooltip7%, 7
+                
+                    ClearTooltips([8, 9, 11, 12, 14])
+                    goto BarMinigame
+                }
+            }
+        }
+    }
+    else if (AutoShake != true or false) {
+        msgbox, 0, AutoShake, Autoshake must be either true or false. Check for any potential spelling errors.
+    }
+
+    if (ShakeMode == "Click") {
+        goto ClickShakeMode
+    }
+    else if (ShakeMode == "Navigation") {
+        goto NavigationShakeMode
+    }
+
+;   CLICK SHAKE ------------------------------------------------------------------------------------------;
+
+ClickShakeFailsafe:
+    ClickFailsafeCount++
+    tooltip, Failsafe: %ClickFailsafeCount%/%ClickShakeFailsafe%, %TooltipX%, %Tooltip12%, 12
+    if (ClickFailsafeCount >= ClickShakeFailsafe)
+    {
+        settimer, ClickShakeFailsafe, off
+        ForceReset := true
+    }
+    return
+
+ClickShakeMode:
+    tooltip, Current Task: Shaking, %TooltipX%, %Tooltip7%, 7
+    tooltip, Click X: None, %TooltipX%, %Tooltip8%, 8
+    tooltip, Click Y: None, %TooltipX%, %Tooltip9%, 9
+    tooltip, Click Count: 0, %TooltipX%, %Tooltip11%, 11
+    tooltip, Failsafe: 0/%ClickShakeFailsafe%, %TooltipX%, %Tooltip12%, 12
+    ClickFailsafeCount := 0
+    ClickCount := 0
+    MemoryX := 0
+    MemoryY := 0
+    ForceReset := false
+    settimer, ClickShakeFailsafe, 1000
+
+ClickShakeModeRedo:
+
+    if (ForceReset) {
+        ClearTooltips([11, 12, 14])
+        goto RestartMacro
+    }
+    
+    PixelSearch, ProgressAreaX,, ProgressAreaRight, ProgressAreaTop, ProgressAreaLeft, ProgressAreaBottom, 0xFFFFFF, 1, Fast
+    if !ErrorLevel {
+        if (ProgressAreaX < (A_ScreenWidth / 2.133333)) {
+            settimer, ClickShakeFailsafe, off
+            
+            ClearTooltips([8, 9, 11, 12, 14])
+            goto BarMinigame
+        }
+    }
+
+    PixelSearch, ProgressAreaX,, ProgressAreaRight, ProgressAreaTop, ProgressAreaLeft, ProgressAreaBottom, 0x9F9F9F, 1, Fast
+    if !ErrorLevel {
+        if (ProgressAreaX < (A_ScreenWidth / 2.133333)) {
+            settimer, ClickShakeFailsafe, off
+            
+            ClearTooltips([8, 9, 11, 12, 14])
+            goto BarMinigame
+        }
+    }
+
+    PixelSearch, ClickX, ClickY, ClickAreaLeft, ClickAreaTop, ClickAreaRight, ClickAreaBottom, 0xFFFFFF, %ClickShakeColorTolerance%, Fast
+    if (!ErrorLevel && (ClickX != MemoryX || ClickY != MemoryY)) {
+        tooltip, Click X: %ClickX%, %TooltipX%, %Tooltip8%, 8
+        tooltip, Click Y: %ClickY%, %TooltipX%, %Tooltip9%, 9
+        loop, 2 {
+            click, %ClickX%, %ClickY%
+            ClickCount++
+            sleep %ClickShakeSecondClickTime%
+        }
+        tooltip, Click Count: %ClickCount%, %TooltipX%, %Tooltip11%, 11
+        MemoryX := ClickX
+        MemoryY := ClickY
+    }
+    sleep 1
+    goto ClickShakeModeRedo
+
+;   NAVIGATION SHAKE --------------------------------------------------------------------------------------;
+
+NavigationShakeFailsafe:
+    NavigationFailsafeCount++
+    tooltip, Failsafe: %NavigationFailsafeCount%/%NavigationShakeFailsafe%, %TooltipX%, %Tooltip10%, 10
+    if (NavigationFailsafeCount >= NavigationShakeFailsafe) {
+        settimer, NavigationShakeFailsafe, off
+        ForceReset := true
+    }
+    return
+
+NavigationShakeMode:
+    tooltip, Current Task: Shaking, %TooltipX%, %Tooltip7%, 7
+    tooltip, Attempt Count: 0, %TooltipX%, %Tooltip8%, 8
+    tooltip, Failsafe: 0/%NavigationShakeFailsafe%, %TooltipX%, %Tooltip10%, 10
+    NavigationFailsafeCount := 0
+    NavigationCounter := 0
+    ForceReset := false
+    settimer, NavigationShakeFailsafe, 1000
+    send {%NavigationKey%}
+
+NavigationShakeModeRedo:
+
+    PixelSearch, ProgressAreaX,, ProgressAreaRight, ProgressAreaTop, ProgressAreaLeft, ProgressAreaBottom, 0xFFFFFF, 1, Fast
+    if !ErrorLevel {
+        if (ProgressAreaX < (A_ScreenWidth / 2.133333)) {
+            settimer, NavigationShakeFailsafe, off
+            
+            ClearTooltips([8, 9, 11, 12, 14])
+            goto BarMinigame
+        }
+    }
+
+    PixelSearch, ProgressAreaX,, ProgressAreaRight, ProgressAreaTop, ProgressAreaLeft, ProgressAreaBottom, 0x9F9F9F, 1, Fast
+    if !ErrorLevel {
+        if (ProgressAreaX < (A_ScreenWidth / 2.133333)) {
+            settimer, NavigationShakeFailsafe, off
+            
+            ClearTooltips([8, 9, 11, 12, 14])
+            goto BarMinigame
+        }
+    }
+
+    if (ForceReset == true)
+    {
+        tooltip,,,, 10
+        goto RestartMacro
+    }
+    
+    sleep %NavigationSpamDelay%
+    NavigationCounter++
+    tooltip, Attempt Count: %NavigationCounter%, %TooltipX%, %Tooltip8%, 8
+    sleep 1
+    send {s}
+    loop, 2 {
+        send {enter}
+    }   
+    goto NavigationShakeModeRedo
+    
+
+;   BAR MINIGAME MISC ------------------------------------------------------------------------------------------;
+
+CheckFail:
+PixelSearch, ProgressAreaX,, ProgressAreaRight, ProgressAreaTop, ProgressAreaLeft, ProgressAreaBottom, 0xFFFFFF, 1, Fast
+if !ErrorLevel {
+    if (ProgressAreaX < (A_ScreenWidth / 2)) {
+		LostVar := true
+	}
+    else {
+        LostVar := false
+    }
+}
+return
+
+BarCalculationFailsafe:
+    BarCalcFailsafeCounter++
+    tooltip, Failsafe: %BarCalcFailsafeCounter%/%BarCalculationFailsafe%, %TooltipX%, %Tooltip10%, 10
+    if (BarCalcFailsafeCounter >= BarCalculationFailsafe) {
+        settimer, BarCalculationFailsafe, off
+        ForceReset := true
+    }
+return
+
+;   BAR MINIGAME MAIN ------------------------------------------------------------------------------------------;
+
+BarMinigame:
+; thanks shiirou
+
+if (Seraphic == true)
+    {
+        tooltip, Current Task: Stablizing Seraphic, %TooltipX%, %Tooltip7%, 7
+        tooltip, , , , 8
+        loop, 25
+        {
+            send {lbutton down}
+            sleep 50
+            send {lbutton up}
+            sleep 30
+        }
+        send {lbutton down}
+        sleep 800
+        send {lbutton up}
+    }
+else {
+    sleep, 500
+}
+tooltip, Current Task: Calculating Bar Size, %TooltipX%, %Tooltip7%, 7
+tooltip, Bar Size: Not Found, %TooltipX%, %Tooltip8%, 8
+tooltip, Failsafe: 0/%BarCalculationFailsafe%, %TooltipX%, %Tooltip10%, 10
+ForceReset := false
+BarCalcFailsafeCounter := 0
+
+DetectionType := false
+settimer, BarCalculationFailsafe, 1000
+
+BarMinigameRedo:
+if (ForceReset == true) {
+    tooltip, , , , 10
+    goto RestartMacro
+}
+
+PixelSearch, BarX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0xFFFFFF, %BarSizeCalculationColorTolerance%, Fast
+if (!ErrorLevel) {
+    settimer, BarCalculationFailsafe, off
+    WhiteBarSize := (MinigameAreaRight - (BarX - MinigameAreaLeft)) - BarX
+    if (ManualBarSize != 0) {
+        WhiteBarSize := ManualBarSize
+    }
+    sleep 50
+    goto BarMinigameSingle
+}
+sleep 1
+goto BarMinigameRedo
+
+BarMinigameSingle:
+tooltip, Current Task: Playing Bar Minigame, %TooltipX%, %Tooltip7%, 7
+tooltip, Bar Size: %WhiteBarSize%, %TooltipX%, %Tooltip8%, 8
+tooltip, Direction: None, %TooltipX%, %Tooltip10%, 10
+tooltip, Forward Delay: None, %TooltipX%, %Tooltip11%, 11
+tooltip, Counter Delay: None, %TooltipX%, %Tooltip12%, 12
+tooltip, Ankle Delay: None, %TooltipX%, %Tooltip13%, 13
+tooltip, Side Delay: None, %TooltipX%, %Tooltip14%, 14
+HalfBarSize := WhiteBarSize/2
+SideDelay := 0
+AnkleBreakDelay := 0
+DirectionalToggle := "Disabled"
+AtLeastFindWhiteBar := false
+MaxLeftToggle := false
+MaxRightToggle := false
+MaxLeftBar := MinigameAreaLeft+WhiteBarSize*SideBarRatio
+MaxRightBar := MinigameAreaRight-WhiteBarSize*SideBarRatio
+tooltip, |, %MaxLeftBar%, %MinigameAreaTooltipHeight%, 18
+tooltip, |, %MaxRightBar%, %MinigameAreaTooltipHeight%, 17
+
+
+settimer, CheckFail, 100
+BarMinigame2:
+ForceReset := false
+BarCalcFailsafeCounter := 0
+settimer, BarCalculationFailsafe, 1000
+
+
+	sleep 1
+    PixelSearch, FishX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0x5B4B43, %FishBarColorTolerance%, Fast
+    if (ErrorLevel == 0)
+    {
+        tooltip, ., %FishX%, %MinigameAreaTooltipHeight%, 20
+        if (FishX < MaxLeftBar)
+        {
+            if (MaxLeftToggle == false)
+            {
+                tooltip, <, %MaxLeftBar%, %MinigameAreaTooltipHeight%, 19
+                tooltip, Direction: Max Left, %TooltipX%, %Tooltip10%, 10
+                tooltip, Forward Delay: Infinite, %TooltipX%, %Tooltip11%, 11
+                tooltip, Counter Delay: None, %TooltipX%, %Tooltip12%, 12
+                tooltip, Ankle Delay: 0, %TooltipX%, %Tooltip13%, 13
+                DirectionalToggle := "Right"
+                MaxLeftToggle := true
+                send {lbutton up}
+                sleep 1
+                send {lbutton up}
+                sleep %SideDelay%
+                AnkleBreakDelay := 0
+                SideDelay := 0
+                tooltip, Side Delay: 0, %TooltipX%, %Tooltip15%, 15
+            }
+            goto BarMinigame2
+        }
+        else if (FishX > MaxRightBar)
+        {
+            if (MaxRightToggle == false)
+            {
+                tooltip, >, %MaxRightBar%, %MinigameAreaTooltipHeight%, 19
+                tooltip, Direction: Max Right, %TooltipX%, %Tooltip10%, 10
+                tooltip, Forward Delay: Infinite, %TooltipX%, %Tooltip11%, 11
+                tooltip, Counter Delay: None, %TooltipX%, %Tooltip12%, 12
+                tooltip, Ankle Delay: 0, %TooltipX%, %Tooltip13%, 13
+                DirectionalToggle := "Left"
+                MaxRightToggle := true
+                send {lbutton down}
+                sleep 1
+                send {lbutton down}
+                sleep %SideDelay%
+                AnkleBreakDelay := 0
+                SideDelay := 0
+                tooltip, Side Delay: 0, %TooltipX%, %Tooltip15%, 15
+            }
+            goto BarMinigame2
+        }
+        MaxLeftToggle := false
+        MaxRightToggle := false
+        PixelSearch, BarX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0xFFFFFF, %WhiteBarColorTolerance%, Fast
+        if (ErrorLevel == 0)
+        {
+            AtLeastFindWhiteBar := true
+            BarX := BarX+(WhiteBarSize/2)
+            if (BarX > FishX)
+            {
+                tooltip, <, %BarX%, %MinigameAreaTooltipHeight%, 19
+                tooltip, Direction: <, %TooltipX%, %Tooltip10%, 10
+                Difference := (BarX-FishX)*ResolutionScaling*StableLeftMultiplier
+                CounterDifference := Difference/StableLeftDivision
+                tooltip, Forward Delay: %Difference%, %TooltipX%, %Tooltip11%, 11
+                tooltip, Counter Delay: %CounterDifference%, %TooltipX%, %Tooltip12%, 12
+                send {lbutton up}
+                if (DirectionalToggle == "Right")
+                {
+                    tooltip, Ankle Delay: 0, %TooltipX%, %Tooltip13%, 13
+                    sleep %AnkleBreakDelay%
+                    AnkleBreakDelay := 0
+                }
+                else
+                {
+                    AnkleBreakDelay := AnkleBreakDelay+(Difference-CounterDifference)*LeftAnkleBreakMultiplier
+                    SideDelay := AnkleBreakDelay/LeftAnkleBreakMultiplier*4.5
+                    tooltip, Ankle Delay: %AnkleBreakDelay%, %TooltipX%, %Tooltip13%, 13
+                    tooltip, Side Delay: %SideDelay%, %TooltipX%, %Tooltip15%, 15
+                }
+                sleep %Difference%
+                PixelSearch, FishX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0x5B4B43, %FishBarColorTolerance%, Fast
+                {
+                    if (FishX < MaxLeftBar)
+                        goto BarMinigame2
+                }
+                send {lbutton down}
+                sleep %CounterDifference%
+                loop, %StabilizerLoop%
+                {
+                    send {lbutton down}
+                    send {lbutton up}
+                }
+                DirectionalToggle := "Left"
+            }
+            else
+            {
+                tooltip, >, %BarX%, %MinigameAreaTooltipHeight%, 19
+                tooltip, Direction: >, %TooltipX%, %Tooltip10%, 10
+                Difference := (FishX-BarX)*ResolutionScaling*StableRightMultiplier
+                CounterDifference := Difference/StableRightDivision
+                tooltip, Forward Delay: %Difference%, %TooltipX%, %Tooltip11%, 11
+                tooltip, Counter Delay: %CounterDifference%, %TooltipX%, %Tooltip12%, 12
+                send {lbutton down}
+                if (DirectionalToggle == "Left")
+                {
+                    tooltip, Ankle Delay: 0, %TooltipX%, %Tooltip13%, 13
+                    sleep %AnkleBreakDelay%
+                    AnkleBreakDelay := 0
+                }
+                else
+                {
+                    AnkleBreakDelay := AnkleBreakDelay+(Difference-CounterDifference)*RightAnkleBreakMultiplier
+                    SideDelay := AnkleBreakDelay/RightAnkleBreakMultiplier*4.5
+                    tooltip, Ankle Delay: %AnkleBreakDelay%, %TooltipX%, %Tooltip13%, 13
+                    tooltip, Side Delay: %SideDelay%, %TooltipX%, %Tooltip15%, 15
+                }
+                sleep %Difference%
+                PixelSearch, FishX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0x5B4B43, %FishBarColorTolerance%, Fast
+                {
+                    if (FishX > MaxRightBar)
+                        goto BarMinigame2
+                }
+                send {lbutton up}
+                sleep %CounterDifference%
+                loop, %StabilizerLoop%
+                {
+                    send {lbutton down}
+                    send {lbutton up}
+                }
+                DirectionalToggle := "Right"
+            }
+        }
+        else
+        {
+            if (AtLeastFindWhiteBar == false)
+            {
+                send {lbutton down}
+                send {lbutton up}
+                goto BarMinigame2
+            }
+            PixelSearch, ArrowX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0x878584, %ArrowColorTolerance%, Fast
+            if (ArrowX > FishX)
+            {
+                tooltip, <, %ArrowX%, %MinigameAreaTooltipHeight%, 19
+                tooltip, Direction: <<<, %TooltipX%, %Tooltip10%, 10
+                Difference := HalfBarSize*UnstableLeftMultiplier
+                CounterDifference := Difference/UnstableLeftDivision
+                tooltip, Forward Delay: %Difference%, %TooltipX%, %Tooltip11%, 11
+                tooltip, Counter Delay: %CounterDifference%, %TooltipX%, %Tooltip12%, 12
+                send {lbutton up}
+                if (DirectionalToggle == "Right")
+                {
+                    tooltip, Ankle Delay: 0, %TooltipX%, %Tooltip13%, 13
+                    sleep %AnkleBreakDelay%
+                    AnkleBreakDelay := 0
+                }
+                else
+                {
+                    AnkleBreakDelay := AnkleBreakDelay+(Difference-CounterDifference)*LeftAnkleBreakMultiplier
+                    SideDelay := AnkleBreakDelay/LeftAnkleBreakMultiplier*4.5
+                    tooltip, Ankle Delay: %AnkleBreakDelay%, %TooltipX%, %Tooltip13%, 13
+                    tooltip, Side Delay: %SideDelay%, %TooltipX%, %Tooltip15%, 15
+                }
+                sleep %Difference%
+                PixelSearch, FishX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0x5B4B43, %FishBarColorTolerance%, Fast
+                {
+                    if (FishX < MaxLeftBar)
+                        goto BarMinigame2
+                }
+                send {lbutton down}
+                sleep %CounterDifference%
+                loop, %StabilizerLoop%
+                {
+                    send {lbutton down}
+                    send {lbutton up}
+                }
+                DirectionalToggle := "Left"
+            }
+            else
+            {
+                tooltip, >, %ArrowX%, %MinigameAreaTooltipHeight%, 19
+                tooltip, Direction: >>>, %TooltipX%, %Tooltip10%, 10
+                Difference := HalfBarSize*UnstableRightMultiplier
+                CounterDifference := Difference/UnstableRightDivision
+                tooltip, Forward Delay: %Difference%, %TooltipX%, %Tooltip11%, 11
+                tooltip, Counter Delay: %CounterDifference%, %TooltipX%, %Tooltip12%, 12
+                send {lbutton down}
+                if (DirectionalToggle == "Left")
+                {
+                    tooltip, Ankle Delay: 0, %TooltipX%, %Tooltip13%, 13
+                    sleep %AnkleBreakDelay%
+                    AnkleBreakDelay := 0
+                }
+                else
+                {
+                    AnkleBreakDelay := AnkleBreakDelay+(Difference-CounterDifference)*RightAnkleBreakMultiplier
+                    SideDelay := AnkleBreakDelay/RightAnkleBreakMultiplier*4.5
+                    tooltip, Ankle Delay: %AnkleBreakDelay%, %TooltipX%, %Tooltip13%, 13
+                    tooltip, Side Delay: %SideDelay%, %TooltipX%, %Tooltip15%, 15
+                }
+                sleep %Difference%
+                PixelSearch, FishX, , MinigameAreaLeft, MinigameAreaTop, MinigameAreaRight, MinigameAreaBottom, 0x5B4B43, %FishBarColorTolerance%, Fast
+                {
+                    if (FishX > MaxRightBar)
+                        goto BarMinigame2
+                }
+                send {lbutton up}
+                sleep %CounterDifference%
+                loop, %StabilizerLoop%
+                {
+                    send {lbutton down}
+                    send {lbutton up}
+                }
+                DirectionalToggle := "Right"
+            }
+        }
+        goto BarMinigame2
+    }
+    else
+    {
+		send {lbutton up}
+		send {rbutton up}
+		send {shift up}
+        ClearTooltips([8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20])
+		if (WebhookURL != "") {
+            if (LostVar) {
+                TotalLost++
+			    SendDiscordMessage("failed", "Failed to catch fish")
+		        sleep 200
+            }
+            else {
+                TotalCaught++
+                SendDiscordMessage("caught", "Successfully caught fish")
+            }
+		}
+        settimer, CheckFail, off
+        sleep %RestartDelay%
+        goto RestartMacro
+    }
+
+;  MANUAL SETUP ------------------------------------------------------------------------------------------;
+
+ManualSetup:
+tooltip, Click Shakes | Ongoing, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*9), 1
+tooltip, Minigame Bar | Incomplete, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*8), 2
+tooltip, Progress Bar | Incomplete, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*7), 3
+
+IterationVal := 1
+Type := "Click"
+
+Gui, ManualSetup:+toolwindow +resize -caption +alwaysontop -border
+Gui, ManualSetup:color, FFFFFF
+Gui, ManualSetup:Show,, XanManualSetupGUI
+WinSet, Transparent, 100, XanManualSetupGUI
+
+LeftManual := 0
+TopManual := 0
+RightManual := 0
+BottomManual := 0
+
+TemporaryLeft := A_ScreenWidth / 3
+TemporaryTop := A_ScreenHeight / 3
+TemporaryLength := A_ScreenHeight / 2
+TemporaryWidth := A_ScreenWidth / 4
+
+Setup:
+WinMove, XanManualSetupGUI, , TemporaryLeft, TemporaryTop, TemporaryLength, TemporaryWidth
+
+OnMessage(0x201, "WM_LBUTTONDOWN")
+
+SetTimer, UpdateManualTooltips, 10
+
+MsgBox, 0, Xan Manual Setup, Click "OK" when you finish positioning %Type%.
+
+IniWrite, %Left%, %ManualFile%, %Type%, Left
+IniWrite, %Top%, %ManualFile%, %Type%, Top
+IniWrite, %Right%, %ManualFile%, %Type%, Right
+IniWrite, %Bottom%, %ManualFile%, %Type%, Bottom
+
+if (Type == "Click") {
+    ClickAreaLeft := %Left%
+    ClickAreaTop := %Top%
+    ClickAreaRight := %Right%
+    ClickAreaBottom := %Bottom%
+    tooltip, Click Shakes | Complete, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*8), 1
+    tooltip, Minigame Bar | Ongoing, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*9), 2
+    Type := "Minigame"
+    goto Setup
+}
+else if (Type == "Minigame") {
+    MinigameAreaLeft := %Left%
+    MinigameAreaTop := %Top%
+    MinigameAreaRight := %Right%
+    MinigameAreaBottom := %Bottom%
+
+    tooltip, Minigame Bar | Complete, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*9), 2
+    tooltip, Progress Bar | Ongoing, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*7), 3
+    Type := "Progress"
+    goto Setup
+}
+else if (Type == "Progress") {
+    ProgressAreaLeft := %Left%
+    ProgressAreaTop := %Top%
+    ProgressAreaRight := %Right%
+    ProgressAreaBottom := %Bottom%
+
+    tooltip, Progress Bar | Complete, % (A_ScreenWidth/20), % (A_ScreenHeight/2)-(20*7), 3
+}
+
+Gui, ManualSetup:Hide
+SetTimer, UpdateManualTooltips, off
+
+ClearTooltips([1, 2, 3, 4, 17, 18, 19, 20])
+
+msgbox, 0, Xan Manual Setup, Manual Setup Complete!`nContinuing to GUI
+
+goto Start
+return
+
+WM_LBUTTONDOWN(wParam, lParam, msg, hwnd)
+{
+PostMessage, 0xA1, 2
+}
+
+UpdateManualTooltips:
+WinGetPos, X, Y, Width, Height, XanManualSetupGUI
+Left := X
+Right := X + Width
+
+Top := Y
+Bottom := Y + Height
+
+MiddleX := X + Width / 2
+MiddleY := Y + Height / 2
+
+ToolTip, L: %Left%, %Left%, %MiddleY%, 17
+ToolTip, T: %Top%, %MiddleX%, %Top%, 18
+ToolTip, R: %Right%, %Right%, %MiddleY%, 19
+ToolTip, B: %Bottom%, %MiddleX%, %Bottom%, 20
+return
+
+;watermark3
+
+ReadSettingsFromFile(filePath) {
+    global iniAutoShakeEnabled, iniAutoShake, iniClickShakeFailsafe, iniClickShakeSecondClick
+    global iniNavigationShakeFailsafe, iniNavigationSpamDelay, iniNavigationKey, iniAutoCamera
+    global iniAutoLookDown, iniAutoBlur, iniZoomCamera, iniAutoGraphics, iniAutoCameraDelay
+    global iniAutoLookDownDelay, iniAutoBlurDelay, iniZoomCameraDelay, iniAutoGraphicsDelay
+    global iniHoldRodDurationVal, iniWaitForBobberVal, iniRestartDelayVal, iniStableRightMultiplier
+    global iniStableLeftMultiplier, iniStableRightDivision, iniStableLeftDivision, iniUnstableRightMultiplier
+    global iniUnstableLeftMultiplier, iniUnstableRightDivision, iniUnstableLeftDivision, iniAnkleRightMultiplier
+    global iniAnkleLeftMultiplier, iniStabilizerLoopValue, iniSidebarRatioValue, iniManualBarSizeValue
+    global iniFishBarTolerance, iniBarCalculationFailsafe, iniBarSizeTolerance, iniClickShakeTolerance
+    global iniArrowTolerance, iniWebhookLinkInput, iniseraphicrod
+
+    IniRead, iniAutoShakeEnabled, %filePath%, AutoShake, auto-shake-enabled, 0
+    IniRead, iniAutoShake, %filePath%, AutoShake, auto-shake, 0
+    IniRead, iniClickShakeFailsafe, %filePath%, AutoShake, shake-failsafe, 0
+    IniRead, iniClickShakeSecondClick, %filePath%, AutoShake, shake-second-click, 0
+    IniRead, iniNavigationShakeFailsafe, %filePath%, AutoShake, navigation-shake-failsafe, 0
+    IniRead, iniNavigationSpamDelay, %filePath%, AutoShake, navigation-spam-delay, 0
+
+    IniRead, iniNavigationKey, %filePath%, General, nav-key, text
+    IniRead, iniAutoCamera, %filePath%, General, auto-enable-camera, 0
+    IniRead, iniAutoLookDown, %filePath%, General, auto-look-down, 0
+    IniRead, iniAutoBlur, %filePath%, General, auto-blur, 0
+    IniRead, iniZoomCamera, %filePath%, General, auto-zoom-camera, 0
+    IniRead, iniAutoGraphics, %filePath%, General, auto-graphics, 0
+
+    IniRead, iniAutoCameraDelay, %filePath%, General, auto-enable-camera-delay, 0
+    IniRead, iniAutoLookDownDelay, %filePath%, General, auto-look-down-delay, 0
+    IniRead, iniAutoBlurDelay, %filePath%, General, auto-blur-delay, 0
+    IniRead, iniZoomCameraDelay, %filePath%, General, auto-zoom-camera-delay, 0
+    IniRead, iniAutoGraphicsDelay, %filePath%, General, auto-graphics-delay, 0
+
+    IniRead, iniHoldRodDurationVal, %filePath%, General, hold-rod-duration-val, 0
+    IniRead, iniWaitForBobberVal, %filePath%, General, wait-for-bobber-val, 0
+    IniRead, iniRestartDelayVal, %filePath%, General, restart-delay-val, 0
+
+    IniRead, iniStableRightMultiplier, %filePath%, Minigame, stable-right-multi, 0
+    IniRead, iniStableLeftMultiplier, %filePath%, Minigame, stable-left-multi, 0
+    IniRead, iniStableRightDivision, %filePath%, Minigame, stable-right-div, 0
+    IniRead, iniStableLeftDivision, %filePath%, Minigame, stable-left-div, 0
+
+    IniRead, iniUnstableRightMultiplier, %filePath%, Minigame, unstable-right-multi, 0
+    IniRead, iniUnstableLeftMultiplier, %filePath%, Minigame, unstable-left-multi, 0
+    IniRead, iniUnstableRightDivision, %filePath%, Minigame, unstable-right-div, 0
+    IniRead, iniUnstableLeftDivision, %filePath%, Minigame, unstable-left-div, 0
+
+    IniRead, iniAnkleRightMultiplier, %filePath%, Minigame, ankle-right-multi, 0
+    IniRead, iniAnkleLeftMultiplier, %filePath%, Minigame, ankle-left-multi, 0
+
+    IniRead, iniStabilizerLoopValue, %filePath%, Minigame, stabilizer-loop-value, 0
+    IniRead, iniSidebarRatioValue, %filePath%, Minigame, sidebar-ratio-value, 0
+
+    IniRead, iniManualBarSizeValue, %filePath%, Minigame, manual-bar-size-value, 0
+
+    IniRead, iniFishBarTolerance, %filePath%, Tolerances, fish-bar-tolerance, 0
+    IniRead, iniBarCalculationFailsafe, %filePath%, Tolerances, bar-calculation-failsafe, 0
+    IniRead, iniBarSizeTolerance, %filePath%, Tolerances, bar-size-tolerance, 0
+    IniRead, iniClickShakeTolerance, %filePath%, Tolerances, click-shake-tolerance, 0
+    IniRead, iniArrowTolerance, %filePath%, Tolerances, arrow-tolerance, 0
+    IniRead, iniseraphicrod, %filePath%, Minigame, seraphic-rod
+    IniRead, iniWebhookLinkInput, %filePath%, Webhook, webhook-link, text
+}
+
+;   FUNCTIONS ---------------------------------------------------------------------------------------------;
+
+
+ClearTooltips(ids) {
+    for index, id in ids {
+        tooltip, , , , %id%
+    }
+}
+
+EnableBlur(hWnd) {
+    WCA_ACCENT_POLICY := 19
+    ACCENT_DISABLED := 0,
+    ACCENT_ENABLE_GRADIENT := 1,
+    ACCENT_ENABLE_TRANSPARENTGRADIENT := 2
+    ACCENT_ENABLE_BLURBEHIND := 3
+    ACCENT_INVALID_STATE := 4
+    accentStructSize := VarSetCapacity(AccentPolicy, 4*4, 0)
+    NumPut(ACCENT_ENABLE_BLURBEHIND, AccentPolicy, 0, "UInt")
+    padding := A_PtrSize == 8 ? 4 : 0
+    VarSetCapacity(WindowCompositionAttributeData, 4 + padding + A_PtrSize + 4 + padding)
+    NumPut(WCA_ACCENT_POLICY, WindowCompositionAttributeData, 0, "UInt")
+    NumPut(&AccentPolicy, WindowCompositionAttributeData, 4 + padding, "Ptr")
+    NumPut(accentStructSize, WindowCompositionAttributeData, 4 + padding + A_PtrSize, "UInt")
+    DllCall("SetWindowCompositionAttribute", "Ptr", hWnd, "Ptr", &WindowCompositionAttributeData)
+}
+
+SendDiscordMessage(type, text) {
+	global TotalCaught, TotalLost, WebhookURL, runtimeH, runtimeM, runtimeS, LastTime
+	TotalFish := TotalCaught + TotalLost
+	Time := (runtimeH * 3600) + (runtimeM * 60) + runtimeS -1
+	CurrentReelTime := (Max(Time - LastTime, 0) > 1) ? Max(Time - LastTime, 0) : 0
+	LastTime := Time
+	SuccessRate := (TotalFish > 0) ? Round((TotalCaught / TotalFish) * 100, 2) : 0
+
+	fields := 
+	(Join
+	[
+		{ "name": "Success Rate", "value": SuccessRate "% Success rate", "inline": true },
+        { "name": "Fish " type, "value": "Took " CurrentReelTime " seconds", "inline": true },
+        { "name": "Runtime", "value": runtimeH "h " runtimeM "m " runtimeS "s", "inline": true }
+	]
+	)
+	
+
+    fieldJSON := ""
+    for index, field in fields {
+        fieldJSON .= "{""id"": 0, ""name"": """ field.name """, ""value"": """ field.value """, ""inline"": true},"
+    }
+    fieldJSON := RTrim(fieldJSON, ",")
+
+	authorJSON := "{""name"": ""Xan V3 Webhook"", ""icon_url"": ""https://i.imgur.com/TQaUdJz.png""}"
+
+
+	embedJSON := "
+	(
+	{
+		""id"": 0,
+		""title"": ""Xan Notification"",
+		""description"": """ text " | " TotalCaught " / " TotalLost """,
+		""color"": 14172498,
+		""fields"": [" fieldJSON "],
+		""author"": " authorJSON "
+	}
+	)"
+
+	postdata := "
+	(
+	{
+		""content"": """",
+		""tts"": false,
+		""embeds"": [" embedJSON "],
+		""components"": [],
+		""actions"": {},
+		""username"": ""Xan V3 Test"",
+		""avatar_url"": ""https://i.imgur.com/TQaUdJz.png""
+	}
+	)"
+
+	try {
+		WebRequest := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	} catch {
+		MsgBox, 16, Error, WinHttp.WinHttpRequest.5.1 is not available on this system.
+		ExitApp
+	}
+	WebRequest.Open("POST", WebhookURL, false)
+	WebRequest.SetRequestHeader("Content-Type", "application/json")
+	
+	try {
+		WebRequest.Send(postdata)
+	} catch {
+		MsgBox, 16, Error, Failed to send webhook. Please check the webhook URL and try again.
+	}
+}
+
+;  EA SERVERHOP ------------------------------------------------------------------------------------------;
+
+ServerHop:
+PlaceId := 16732694052
+JobId := "currentJobId" ;placeholder
+
+HttpRequest := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+HttpRequest.Open("GET", "https://games.roblox.com/v1/games/" PlaceId "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true", false)
+HttpRequest.Send()
+
+Response := HttpRequest.ResponseText
+
+JoinedServers := []
+Servers := []
+Loop {
+    Pos := InStr(Response, """id"":""")
+    if (Pos = 0)
+        break
+
+    Response := SubStr(Response, Pos + 6) 
+    EndPos := InStr(Response, """") 
+    ServerID := SubStr(Response, 1, EndPos - 1)
+
+    PlayingPos := InStr(Response, """playing"":") + 10
+    MaxPlayersPos := InStr(Response, """maxPlayers"":") + 13
+    Playing := SubStr(Response, PlayingPos, InStr(Response, ",", , PlayingPos) - PlayingPos)
+    MaxPlayers := SubStr(Response, MaxPlayersPos, InStr(Response, ",", , MaxPlayersPos) - MaxPlayersPos)
+
+    if ((Playing < MaxPlayers) and (ServerID != JobId) and (!JoinedServers.Contains(ServerID))) {
+        Servers.Push(ServerID)
+    }
+}
+
+if (Servers.MaxIndex() > 0) {
+    Random, RandomIndex, 1, Servers.MaxIndex()
+    SelectedServer := Servers[RandomIndex]
+    Run, roblox://placeId=%PlaceId%&gameInstanceId=%SelectedServer%
+    Servers.RemoveAt(RandomIndex)
+    JoinedServers.Push(SelectedServer)
+    MsgBox, 0, Xan V3, Serverhop: Successfully found a server., 5
+} else {
+    MsgBox, 0, Xan V3, Serverhop: Couldn't find a server., 5
+}
+return

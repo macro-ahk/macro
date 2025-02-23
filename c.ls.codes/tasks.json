@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build DLL",
+            "type": "shell",
+            "command": "g++ -shared -o MyDLL.dll MyDLL.cpp -DBUILD_DLL",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build Main",
+            "type": "shell",
+            "command": "g++ -o main.exe main.cpp -L. -lMyDLL",
+            "group": "build"
+        }
+    ]
+}
